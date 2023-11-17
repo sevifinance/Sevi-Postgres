@@ -1,0 +1,21 @@
+---
+version: '3'
+
+services:
+  postgres-cn:
+    # image: registry.gitlab.com/dalibo/postgresql_anonymizer
+    build:
+      dockerfile: ./Dockerfile
+    ports:
+      - "54322:5432"
+    environment:
+      - POSTGRES_PASSWORD=CHANGEME
+      - PGUSER=postgres    # required for `make installcheck`
+      - POSTGRES_HOST_AUTH_METHOD=trust
+      - PG_VERSION=16
+    # volumes:
+    #   - $PWD:/tmp/source
+    # working_dir: /tmp/source
+    # command: >
+    #   postgres  -c shared_preload_libraries='anon'
+    #             -c hba_file=/tmp/source/pg_dump_anon/tests/pg_hba.conf
