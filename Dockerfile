@@ -21,10 +21,11 @@ LABEL name="PostgreSQL + PostGIS Container Images" \
       vendor="The CloudNativePG Contributors" \
       version="${PG_VERSION}" \
       release="11" \
-      summary="PostgreSQL + PostGIS Container images." \
-      description="This Docker image contains PostgreSQL, PostGIS and Barman Cloud based on Postgres 16-3.4."
+      summary="PostgreSQL + PostGIS + anonymizer Container images." \
+      description="This Docker image contains PostgreSQL, PostGIS and Barman Cloud based on Postgres 16-3.4. PgAnonymizer was manually added"
 
 COPY requirements.txt /
+COPY ./anon ./anon
 
 # Install additional extensions
 RUN set -xe; \
@@ -33,11 +34,22 @@ RUN set -xe; \
 		"postgresql-${PG_MAJOR}-pgaudit" \
 		"postgresql-${PG_MAJOR}-pg-failover-slots" \
 		"postgresql-${PG_MAJOR}-pgrouting" \
-	; \
+		"make" \
+		"postgresql-server-dev-16" \
+		"gcc"; \
 	rm -fr /tmp/* ; \
 	rm -rf /var/lib/apt/lists/*;
 
+
+WORKDIR /anon
+
+RUN	ls -l; \
+	make extension; \
+ 	make install;
+
 # Install barman-cloud
+
+	WORKDIR ..
 RUN set -xe; \
 	apt-get update; \
 	apt-get install -y --no-install-recommends \
@@ -48,16 +60,12 @@ RUN set -xe; \
 	pip3 install --upgrade pip; \
 # TODO: Remove --no-deps once https://github.com/pypa/pip/issues/9644 is solved
 	pip3 install --no-deps -r requirements.txt; \
-	rm -rf /var/lib/apt/lists/*;
+    rm -rf /var/lib/apt/lists/*;
+
+COPY ./anon/docker/09_init_anon.sh /docker-entrypoint-initdb.d/
+RUN chmod +x /docker-entrypoint-initdb.d/09_init_anon.sh
 
 
-
-COPY ./anon ./anon
-RUN cd anon \
-	make extension \
- 	sudo make install
-
-
-# Change the uid of postgres to 26
-RUN usermod -u 26 postgres
+# # Change the uid of postgres to 26
+RUN chown -R postgres /var/lib/postgresql/data && usermod -u 26 postgres  
 USER 26
