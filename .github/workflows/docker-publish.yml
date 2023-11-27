@@ -33,7 +33,7 @@ jobs:
       id: build-image
       run: |
         # Build a docker container and push it to GITHUB
-        docker build  -f ./Dockerfile -t pggisanon .
+        docker build --no-cache -f ./Dockerfile -t pggisanon .
         docker tag pggisanon:latest ghcr.io/sevifinance/pggisanon:${CONTAINER_IMAGE_TAG}
         docker tag pggisanon:latest ghcr.io/sevifinance/pggisanon:latest
         docker push ghcr.io/sevifinance/pggisanon:${CONTAINER_IMAGE_TAG}
