@@ -6,6 +6,10 @@ on:
     branches:
       - pg-anon-build  # or any branch you want to trigger the workflow
 
+
+env:
+  CONTAINER_IMAGE_TAG: ${{ github.run_number }
+  
 jobs:
   build-and-push:
     runs-on: ubuntu-latest
