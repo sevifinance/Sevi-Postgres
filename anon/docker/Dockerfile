@@ -2,7 +2,7 @@
 # This instructions must be declared before any FROM
 # You can override it and build your own image based another version
 # like this: `PG_MAJOR_VERSION=11 make docker_image`
-ARG PG_MAJOR_VERSION=15
+ARG PG_MAJOR_VERSION=16
 
 ##
 ## First Stage: build pg_dump_anon
