@@ -14,7 +14,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-FROM postgis/postgis:15-3.4
+FROM postgis/postgis:16-3.4
 
 # Do not split the description, otherwise we will see a blank space in the labels
 LABEL name="PostgreSQL + PostGIS Container Images" \
@@ -22,7 +22,7 @@ LABEL name="PostgreSQL + PostGIS Container Images" \
       version="${PG_VERSION}" \
       release="11" \
       summary="PostgreSQL + PostGIS + anonymizer Container images." \
-      description="This Docker image contains PostgreSQL, PostGIS and Barman Cloud based on Postgres 15-3.4. PgAnonymizer was manually added"
+      description="This Docker image contains PostgreSQL, PostGIS and Barman Cloud based on Postgres 16-3.4. PgAnonymizer was manually added"
 
 COPY requirements.txt /
 COPY ./anon ./anon
@@ -35,7 +35,7 @@ RUN set -xe; \
 		"postgresql-${PG_MAJOR}-pg-failover-slots" \
 		"postgresql-${PG_MAJOR}-pgrouting" \
 		"make" \
-		"postgresql-server-dev-15" \
+		"postgresql-server-dev-16" \
 		"gcc"; \
 	rm -fr /tmp/* ; \
 	rm -rf /var/lib/apt/lists/*;
