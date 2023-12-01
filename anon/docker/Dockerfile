@@ -15,7 +15,7 @@ RUN CGO_ENABLED=0 GOOS=linux go build .
 ##
 ## Second Stage
 ##
-ARG PG_MAJOR_VERSION=15
+ARG PG_MAJOR_VERSION=16
 FROM postgres:$PG_MAJOR_VERSION
 
 # An ARG declared before a FROM is outside of a build stage, so it can’t be
