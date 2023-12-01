@@ -2,7 +2,7 @@
 # This instructions must be declared before any FROM
 # You can override it and build your own image based another version
 # like this: `PG_MAJOR_VERSION=11 make docker_image`
-ARG PG_MAJOR_VERSION=15
+ARG PG_MAJOR_VERSION=16
 
 ##
 ## First Stage: build pg_dump_anon
@@ -26,8 +26,8 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     gcc \
     git \
     make \
-    postgresql-server-dev-15 \
-    postgresql-plpython3-15 \
+    postgresql-server-dev-$PG_MAJOR_VERSION \
+    postgresql-plpython3-$PG_MAJOR_VERSION \
     pgxnclient \
     libc6-dev \
     wget \
