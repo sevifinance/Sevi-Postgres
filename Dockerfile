@@ -50,13 +50,15 @@ RUN set -xe; \
 	pip3 install --no-deps -r requirements.txt; \
 	rm -rf /var/lib/apt/lists/*;
 
+# Install Git and clone the repository
+RUN set -xe; \
+    apt-get update && apt-get install -y git; \
+    git clone https://gitlab.com/dalibo/postgresql_anonymizer.git
 
-
-COPY ./anon ./anon
-RUN cd anon \
+# COPY ./anon ./anon
+RUN cd postgresql_anonymizer \
 	make extension \
  	sudo make install
-
 
 # Change the uid of postgres to 26
 RUN usermod -u 26 postgres
