@@ -14,6 +14,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
+
 FROM postgis/postgis:16-3.4
 
 # Do not split the description, otherwise we will see a blank space in the labels
