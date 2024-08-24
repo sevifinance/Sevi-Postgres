@@ -23,7 +23,7 @@ ENV PG_MAJOR=16
 LABEL name="PostgreSQL + TimescaleDB + PostGIS Container Images" \
 	version="${PG_VERSION}" \
 	release="59" \
-	summary="PostgreSQL + TimescaleDB + PostGIS Container images." \
+	summary="PostgreSQL + TimescaleDB + PostGIS + anon Container images." \
 	description="This Docker image contains PostgreSQL, TimescaleDB, PostGIS and Barman Cloud based on Postgres 16-3.4."
 
 COPY requirements.txt /
@@ -65,10 +65,8 @@ RUN set -xe; \
 	rm -rf /var/lib/apt/lists/*;
 
 
+# Install postgresql_anonymizer
 
-# #
-# # Install postgresql_anonymizer
-# #
 RUN set -xe; \
     apt-get update && \
     apt-get install -y --no-install-recommends \
