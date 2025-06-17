@@ -4,8 +4,8 @@
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-# 
+# You may obtain a copy of the License at
+# 
 #    http://www.apache.org/licenses/LICENSE-2.0
 #
 # Unless required by applicable law or agreed to in writing, software
@@ -47,6 +47,7 @@ RUN set -xe; \
 	"postgresql-${PG_MAJOR}-pg-failover-slots" \
 	"postgresql-${PG_MAJOR}-pgrouting" \
     "postgresql-contrib-${PG_MAJOR}" \
+	"postgresql-${PG_MAJOR}-pgvector" \
 	; \
 	rm -fr /tmp/* ; \
 	rm -rf /var/lib/apt/lists/*;
@@ -69,11 +70,36 @@ RUN set -xe; \
 
 RUN set -xe; \
     apt-get update && \
+    (apt-get install -y --no-install-recommends \
+    build-essential \
+    clang-13 \
+    llvm-13 \
+    llvm-13-dev \
+    git \
+    pkg-config \
+    pgxnclient \
+    "postgresql-server-dev-${PG_MAJOR}" || \
     apt-get install -y --no-install-recommends \
     build-essential \
+    clang \
+    llvm \
+    llvm-dev \
+    git \
+    pkg-config \
+    pgxnclient \
+    "postgresql-server-dev-${PG_MAJOR}") && \
+    # Ensure symlinks exist regardless of which version was installed
+    (test -f /usr/bin/clang-13 || ln -sf /usr/bin/clang /usr/bin/clang-13) && \
+    (test -f /usr/bin/llvm-config-13 || ln -sf /usr/bin/llvm-config /usr/bin/llvm-config-13) && \
+    pgxn install postgresql_anonymizer && \
+    apt-get purge -y --auto-remove \
+    build-essential \
+    clang* \
+    llvm* \
+    git \
+    pkg-config \
     pgxnclient \
     "postgresql-server-dev-${PG_MAJOR}" && \
-    pgxn install postgresql_anonymizer && \
     rm -rf /var/lib/apt/lists/*
 
 # Change the uid of postgres to 26
