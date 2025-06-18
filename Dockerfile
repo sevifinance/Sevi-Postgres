@@ -14,27 +14,27 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-FROM postgis/postgis:16-3.4
+FROM postgis/postgis:17-3.4
 
 # Set environment variables
-ENV PG_MAJOR=16
+ENV PG_MAJOR=17
 
 # Do not split the description, otherwise we will see a blank space in the labels
 LABEL name="PostgreSQL + TimescaleDB + PostGIS Container Images" \
 	version="${PG_VERSION}" \
 	release="59" \
 	summary="PostgreSQL + TimescaleDB + PostGIS + anon Container images." \
-	description="This Docker image contains PostgreSQL, TimescaleDB, PostGIS and Barman Cloud based on Postgres 16-3.4."
+	description="This Docker image contains PostgreSQL, TimescaleDB, PostGIS and Barman Cloud based on Postgres 17-3.4."
 
 COPY requirements.txt /
 
-# Install timescaledb 2.x
+# Install timescaledb 2.20.3
 RUN apt-get update \
     && apt-get install -y lsb-release wget \
     && echo "deb https://packagecloud.io/timescale/timescaledb/debian/ $(lsb_release -c -s) main" | tee /etc/apt/sources.list.d/timescaledb.list \
     && wget --quiet -O - https://packagecloud.io/timescale/timescaledb/gpgkey | apt-key add - \
     && apt-get update \
-    && apt-get install -y "timescaledb-2-postgresql-${PG_MAJOR}" "timescaledb-toolkit-postgresql-${PG_MAJOR}" \
+    && apt-get install -y "timescaledb-2-postgresql-${PG_MAJOR}=2.20.3*" "timescaledb-toolkit-postgresql-${PG_MAJOR}" \
     && apt-get remove -y lsb-release wget \
     && 	rm -fr /tmp/* \
     && 	rm -rf /var/lib/apt/lists/*
@@ -73,20 +73,20 @@ RUN set -xe; \
     (apt-get install -y --no-install-recommends \
     build-essential \
     clang-13 \
+    git \
     llvm-13 \
     llvm-13-dev \
-    git \
-    pkg-config \
     pgxnclient \
+    pkg-config \
     "postgresql-server-dev-${PG_MAJOR}" || \
     apt-get install -y --no-install-recommends \
     build-essential \
     clang \
+    git \
     llvm \
     llvm-dev \
-    git \
-    pkg-config \
     pgxnclient \
+    pkg-config \
     "postgresql-server-dev-${PG_MAJOR}") && \
     # Ensure symlinks exist regardless of which version was installed
     (test -f /usr/bin/clang-13 || ln -sf /usr/bin/clang /usr/bin/clang-13) && \

@@ -4,9 +4,9 @@ Tag 16 is required for the tag re
 
 **build image:**
 
-docker buildx build --platform linux/amd64,linux/arm64 -t ghcr.io/sevifinance/pggisanon:16 .
+docker buildx build --platform linux/amd64,linux/arm64 -t ghcr.io/sevifinance/pggisanon:17 .
 
-docker tag ghcr.io/sevifinance/pggisanon:16 ghcr.io/sevifinance/pggisanon:latest
+docker tag ghcr.io/sevifinance/pggisanon:17 ghcr.io/sevifinance/pggisanon:latest
 
 **then**
 
@@ -16,7 +16,7 @@ docker login ghcr.io -u grinono
 
 **then**
 
-docker push ghcr.io/sevifinance/pggisanon:16
+docker push ghcr.io/sevifinance/pggisanon:17
 
 docker push ghcr.io/sevifinance/pggisanon:latest
 
