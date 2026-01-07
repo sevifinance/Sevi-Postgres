@@ -125,4 +125,7 @@ RUN apk add --no-cache shadow && usermod -u 26 postgres
 # Ensure /data directory exists and has correct permissions
 RUN mkdir -p /data/postgres && chown -R postgres:postgres /data && chmod 700 /data/postgres
 
+# CloudNativePG requires /var/lib/postgresql/data to be present for volume mounting
+RUN mkdir -p /var/lib/postgresql/data && chown -R postgres:postgres /var/lib/postgresql/data && chmod 700 /var/lib/postgresql/data
+
 USER 26

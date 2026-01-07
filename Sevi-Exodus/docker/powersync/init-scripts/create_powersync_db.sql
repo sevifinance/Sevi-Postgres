@@ -1,0 +1,2 @@
+CREATE DATABASE powersync_storage;
+CREATE PUBLICATION powersync FOR ALL TABLES;
