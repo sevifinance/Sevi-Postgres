@@ -126,6 +126,12 @@ RUN apk add --no-cache shadow && usermod -u 26 postgres
 RUN mkdir -p /data/postgres && chown -R postgres:postgres /data && chmod 700 /data/postgres
 
 # CloudNativePG requires /var/lib/postgresql/data to be present for volume mounting
-RUN mkdir -p /var/lib/postgresql/data && chown -R postgres:postgres /var/lib/postgresql/data && chmod 700 /var/lib/postgresql/data
+# The base alpine image often symlinks this to '.', which causes mount errors in some runtimes.
+# We must remove the symlink/directory and recreate it as a real directory.
+RUN rm -rf /var/lib/postgresql/data && mkdir -p /var/lib/postgresql/data && chown -R postgres:postgres /var/lib/postgresql/data && chmod 700 /var/lib/postgresql/data
+
+# Verify directory exists and is NOT a symlink
+RUN ls -ld /var/lib/postgresql/data
+
 
 USER 26
