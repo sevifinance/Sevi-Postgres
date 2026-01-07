@@ -69,6 +69,7 @@ spec:
     shared_preload_libraries:
     - anon
     - timescaledb
+    - pg_ivm
     syncReplicaElectionConstraint:
       enabled: false
   primaryUpdateMethod: restart

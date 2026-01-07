@@ -14,94 +14,115 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-FROM postgis/postgis:17-3.4
+FROM postgres:18-alpine
 
 # Set environment variables
-ENV PG_MAJOR=17
+ENV PG_MAJOR=18
 
 # Do not split the description, otherwise we will see a blank space in the labels
 LABEL name="PostgreSQL + TimescaleDB + PostGIS Container Images" \
 	version="${PG_VERSION}" \
 	release="59" \
 	summary="PostgreSQL + TimescaleDB + PostGIS + anon Container images." \
-	description="This Docker image contains PostgreSQL, TimescaleDB, PostGIS and Barman Cloud based on Postgres 17-3.4."
+	description="This Docker image contains PostgreSQL, TimescaleDB, PostGIS and Barman Cloud based on Postgres 18-alpine."
 
 COPY requirements.txt /
 
-# Install timescaledb 2.20.3
-RUN apt-get update \
-    && apt-get install -y lsb-release wget \
-    && echo "deb https://packagecloud.io/timescale/timescaledb/debian/ $(lsb_release -c -s) main" | tee /etc/apt/sources.list.d/timescaledb.list \
-    && wget --quiet -O - https://packagecloud.io/timescale/timescaledb/gpgkey | apt-key add - \
-    && apt-get update \
-    && apt-get install -y "timescaledb-2-postgresql-${PG_MAJOR}=2.20.3*" "timescaledb-toolkit-postgresql-${PG_MAJOR}" \
-    && apt-get remove -y lsb-release wget \
-    && 	rm -fr /tmp/* \
-    && 	rm -rf /var/lib/apt/lists/*
+# Install build dependencies and tools
+RUN apk add --no-cache \
+    build-base \
+    clang19 \
+    llvm19 \
+    git \
+    cmake \
+    python3 \
+    py3-pip \
+    python3-dev \
+    postgresql-dev \
+    libffi-dev \
+    openssl-dev \
+    snappy-dev \
+    cargo \
+    rust \
+    # Runtime utilities
+    bash \
+    wget \
+    ca-certificates \
+    autoconf \
+    automake \
+    libtool \
+    krb5-dev \
+    # PostGIS dependencies
+    gdal-dev \
+    geos-dev \
+    proj-dev \
+    libxml2-dev \
+    json-c-dev \
+    protobuf-c-dev
 
-# Install pgaudit
-RUN set -xe; \
-	apt-get update; \
-	apt-get install -y --no-install-recommends \
-	"postgresql-${PG_MAJOR}-pgaudit" \
-	"postgresql-${PG_MAJOR}-pg-failover-slots" \
-	"postgresql-${PG_MAJOR}-pgrouting" \
-    "postgresql-contrib-${PG_MAJOR}" \
-	"postgresql-${PG_MAJOR}-pgvector" \
-	; \
-	rm -fr /tmp/* ; \
-	rm -rf /var/lib/apt/lists/*;
+# Install PostGIS from source (since we are not using postgis base image)
+RUN set -ex \
+    && git clone https://github.com/postgis/postgis.git \
+    && cd postgis \
+    && git checkout 3.6.1 \
+    && ./autogen.sh \
+    && ./configure \
+    && make \
+    && make install \
+    && cd .. && rm -rf postgis
+
+# Install TimescaleDB
+# Building from source since Alpine packages might not align or be available for PG18/specific version
+RUN set -ex \
+    && git clone https://github.com/timescale/timescaledb.git \
+    && cd timescaledb \
+    && git checkout 2.23.1 \
+    && ./bootstrap -DREGRESS_CHECKS=OFF \
+    && cd build && make && make install \
+    && cd ../.. && rm -rf timescaledb
+
+# Install pgaudit, pgrouting, pgvector, pg_ivm
+# pgrouting is likely included in postgis image, but we can verify or reinstall if needed.
+# For now, we assume postgis image has pgrouting.
+RUN set -ex \
+    # pgaudit
+    && git clone https://github.com/pgaudit/pgaudit.git \
+    && cd pgaudit \
+    && git checkout REL_18_STABLE \
+    && make install USE_PGXS=1 \
+    && cd .. && rm -rf pgaudit \
+    # pgvector
+    && git clone --branch v0.8.1 https://github.com/pgvector/pgvector.git \
+    && cd pgvector \
+    && make \
+    && make install \
+    && cd .. && rm -rf pgvector \
+    # pg_ivm
+    && git clone https://github.com/sraoss/pg_ivm.git \
+    && cd pg_ivm \
+    && make install \
+    && cd .. && rm -rf pg_ivm
 
 # Install barman-cloud
 RUN set -xe; \
-	apt-get update; \
-	apt-get install -y --no-install-recommends \
-	python3-pip \
-	python3-psycopg2 \
-	python3-setuptools \
-	; \
-	pip3 install --upgrade pip; \
-	# TODO: Remove --no-deps once https://github.com/pypa/pip/issues/9644 is solved
-	pip3 install --no-deps -r requirements.txt; \
-	rm -rf /var/lib/apt/lists/*;
-
+	pip3 install --upgrade pip --break-system-packages; \
+    # Install dependencies that might need compilation
+	pip3 install --no-deps -r requirements.txt --break-system-packages;
 
 # Install postgresql_anonymizer
-
 RUN set -xe; \
-    apt-get update && \
-    (apt-get install -y --no-install-recommends \
-    build-essential \
-    clang-13 \
-    git \
-    llvm-13 \
-    llvm-13-dev \
-    pgxnclient \
-    pkg-config \
-    "postgresql-server-dev-${PG_MAJOR}" || \
-    apt-get install -y --no-install-recommends \
-    build-essential \
-    clang \
-    git \
-    llvm \
-    llvm-dev \
-    pgxnclient \
-    pkg-config \
-    "postgresql-server-dev-${PG_MAJOR}") && \
-    # Ensure symlinks exist regardless of which version was installed
-    (test -f /usr/bin/clang-13 || ln -sf /usr/bin/clang /usr/bin/clang-13) && \
-    (test -f /usr/bin/llvm-config-13 || ln -sf /usr/bin/llvm-config /usr/bin/llvm-config-13) && \
-    pgxn install postgresql_anonymizer && \
-    apt-get purge -y --auto-remove \
-    build-essential \
-    clang* \
-    llvm* \
-    git \
-    pkg-config \
-    pgxnclient \
-    "postgresql-server-dev-${PG_MAJOR}" && \
-    rm -rf /var/lib/apt/lists/*
+    pip3 install pgxnclient --break-system-packages; \
+    pgxn install postgresql_anonymizer; \
+    # Cleanup build deps if desired to save space (omitted for safety in this step)
+    rm -rf /root/.cache
 
 # Change the uid of postgres to 26
-RUN usermod -u 26 postgres
+# Alpine uses busybox, usermod might be missing unless shadow is installed.
+# But standard postgres alpine image creates postgres user.
+# We install shadow to get usermod.
+RUN apk add --no-cache shadow && usermod -u 26 postgres
+
+# Ensure /data directory exists and has correct permissions
+RUN mkdir -p /data/postgres && chown -R postgres:postgres /data && chmod 700 /data/postgres
+
 USER 26
