@@ -1,0 +1,25 @@
+apiVersion: postgresql.cnpg.io/v1
+kind: Pooler
+metadata:
+  name: pooler-rw
+  namespace: postgres
+  labels:
+    objectset.rio.cattle.io/hash: c99506c18a7482133dae51bd92326d48e8df7ee5
+  annotations:
+    objectset.rio.cattle.io/id: 53c14621-1333-4507-a366-c1dada50d754
+spec:
+  cluster:
+    name: postgres-production-5
+  instances: 3
+  pgbouncer:
+    parameters:
+      default_pool_size: "10"
+      ignore_startup_parameters: search_path
+      max_client_conn: "1000"
+      max_prepared_statements: "100"
+      server_reset_query: DEALLOCATE ALL
+      server_reset_query_always: "1"
+    paused: false
+    poolMode: transaction
+  type: rw
+

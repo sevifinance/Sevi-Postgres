@@ -1,0 +1,49 @@
+apiVersion: postgresql.cnpg.io/v1
+kind: Pooler
+metadata:
+  annotations:
+    cnpg.io/reconcile-at: "1767860548"
+    objectset.rio.cattle.io/applied: H4sIAAAAAAAA/3yQTY7bMAyF78K17VqW/+I7FOiqW4OWmEStIqkS3bQT5O4DOsBgVrOznx4/6tMDMLmflIuLARZIsfAlU/njGxPSpXHx218FFfx2wcICP2L0lKGCGzFaZITlARhCZGQXQ5HfuP0iw4W4yS42Bpk9CccJYNBG9WOnaqW1rvuhnWrU41gbZdHi0Npp6OFZgceN/Je4K5YrLGBOp6EdjZpx6udOaW2RBrXZU6e70fYzzfY8EQ0CDXijw1Ek6nyHV1QSGvrkLtWSyMh24/fClOXzY/rVqlOOdjeiXR90FwpjMFRg0RWkyxb3YF6jCTPeiCkfRpbOuHte5R5rcW9CVa08Kv5bjXcUeDUxhCNuW2FL9Xu00uSMoeCxV074f5I03+H5fA8AAP//XFjT0swBAAA
+    objectset.rio.cattle.io/id: 53c14621-1333-4507-a366-c1dada50d754
+  creationTimestamp: "2025-02-06T17:06:25Z"
+  generation: 4
+  labels:
+    objectset.rio.cattle.io/hash: c99506c18a7482133dae51bd92326d48e8df7ee5
+  name: pooler-rw
+  namespace: postgres
+  resourceVersion: "358738944"
+  uid: 4acb05b5-e99f-4a1b-b37f-a62f2e0757ba
+spec:
+  cluster:
+    name: postgres-production-5
+  instances: 3
+  pgbouncer:
+    parameters:
+      default_pool_size: "10"
+      ignore_startup_parameters: search_path
+      max_client_conn: "1000"
+      max_prepared_statements: "100"
+      server_reset_query: DEALLOCATE ALL
+      server_reset_query_always: "1"
+    paused: false
+    poolMode: transaction
+  type: rw
+status:
+  instances: 3
+  secrets:
+    clientCA:
+      name: postgres-production-5-ca
+      version: "318891070"
+    clientTLS:
+      name: postgres-production-5-server
+      version: "318891072"
+    pgBouncerSecrets:
+      authQuery:
+        name: postgres-production-5-pooler
+        version: "355708343"
+    serverCA:
+      name: postgres-production-5-ca
+      version: "318891070"
+    serverTLS:
+      name: postgres-production-5-server
+      version: "318891072"
