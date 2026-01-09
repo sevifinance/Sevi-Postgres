@@ -133,4 +133,7 @@ RUN rm -rf /var/lib/postgresql/data && mkdir -p /var/lib/postgresql/data && chow
 # Verify directory exists and is NOT a symlink
 RUN ls -ld /var/lib/postgresql/data
 
+# Create /var/run/postgresql directory for Unix domain sockets
+RUN mkdir -p /var/run/postgresql && chown -R postgres:postgres /var/run/postgresql && chmod 755 /var/run/postgresql
+
 USER 26
